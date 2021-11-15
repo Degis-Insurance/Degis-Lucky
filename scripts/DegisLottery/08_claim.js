@@ -35,11 +35,11 @@ module.exports = async callback => {
       // console.log('[INFO]:', 'CONTRACT PENDING AWARDS', currentLotteryId.toString(), web3.utils.fromWei(lotteryInfo.pendingAwards.toString()))
       // const pendingInjectionNextLottery = await lottery.pendingInjectionNextLottery.call()
       // console.log('[INFO]:', 'CONTRACT NEXT ROUND OF MONEY', web3.utils.fromWei(pendingInjectionNextLottery.toString()))
-      // const user1Awadrs = await lottery.viewClaimAllTickets(currentLotteryId,{from:user1})
-      // const user2Awadrs = await lottery.viewClaimAllTickets(currentLotteryId,{from:user2})
+      const user1Awadrs = await lottery.viewClaimAllTickets(currentLotteryId,{from:user1})
+      const user2Awadrs = await lottery.viewClaimAllTickets(currentLotteryId,{from:user2})
 
-      // console.log('[INFO]:', 'USER1 AWADRS', currentLotteryId.toString(), web3.utils.fromWei(user1Awadrs.toString()))
-      // console.log('[INFO]:', 'USER2 AWADRS', currentLotteryId.toString(), web3.utils.fromWei(user2Awadrs.toString()))
+      console.log('[INFO]:', 'USER1 AWADRS', user1Awadrs)
+      console.log('[INFO]:', 'USER2 AWADRS', user2Awadrs)
 
       user1USDTokenBalance = await mockUSD.balanceOf(user1)
       user2USDTokenBalance = await mockUSD.balanceOf(user2)

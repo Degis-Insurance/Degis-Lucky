@@ -31,6 +31,12 @@ module.exports = async callback => {
       console.log('[INFO]:', 'USER2 USD BALANCE', web3.utils.fromWei(user2USDTokenBalance.toString()))
 
       console.log("----------- End claim -------------") 
+
+      const lotteryInfo = await lottery.viewAllLottery()
+      console.log("===============")
+      console.log(lotteryInfo)
+      console.log("===============")
+
       callback(true)
     }
     catch (err) {

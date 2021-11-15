@@ -44,14 +44,14 @@ module.exports = async callback => {
       const user1Awadrs = await lottery.viewClaimAllTickets(currentLotteryId,{from:user1})
       const user2Awadrs = await lottery.viewClaimAllTickets(currentLotteryId,{from:user2})
 
-      console.log('[INFO]:', 'USER1 AWADRS', currentLotteryId.toString(), web3.utils.fromWei(user1Awadrs.toString()))
-      console.log('[INFO]:', 'USER2 AWADRS', currentLotteryId.toString(), web3.utils.fromWei(user2Awadrs.toString()))
+      console.log('[INFO]:', 'USER1 AWADRS', user1Awadrs)
+      console.log('[INFO]:', 'USER2 AWADRS', user2Awadrs)
 
-      for (var i=0;i<40;i++)
-      {
-        u = await lottery.viewRewardsForTicketId(currentLotteryId, i)
-        console.log('[INFO]:', i,web3.utils.fromWei(u.toString()));
-      }
+      // for (var i=0;i<40;i++)
+      // {
+      //   u = await lottery.viewRewardsForTicketId(currentLotteryId, i)
+      //   console.log('[INFO]:', i,web3.utils.fromWei(u.toString()));
+      // }
 
       console.log("----------- End draw -------------") 
       callback(true)

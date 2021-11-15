@@ -50,18 +50,29 @@ module.exports = async callback => {
         console.log(tx2.tx)
 
         const currentLotteryId = await lottery.viewCurrentLotteryId()
-        const user1TicketsResponse = await lottery.viewUserInfoForLotteryId(user1, currentLotteryId, 0, 20, {from: user1});
-        const user2TicketsResponse = await lottery.viewUserInfoForLotteryId(user2, currentLotteryId, 0, 20, {from: user2});
 
+        const user1TicketsResponse = await lottery.viewUserInfo(user1,{from: user1})
+        const user2TicketsResponse = await lottery.viewUserInfo(user2,{from: user2})
         console.log("[INFO]","USER1 Tickets:")
         console.log(user1TicketsResponse[0].toString())
         console.log(user1TicketsResponse[1].toString())
-        console.log(user1TicketsResponse[2].toString())       
-       
+
         console.log("[INFO]","USER2 Tickets:")
         console.log(user2TicketsResponse[0].toString())
         console.log(user2TicketsResponse[1].toString())
-        console.log(user2TicketsResponse[2].toString()) 
+
+        // const user1TicketsResponse = await lottery.viewUserInfoForLotteryId(user1, currentLotteryId, 0, 20, {from: user1});
+        // const user2TicketsResponse = await lottery.viewUserInfoForLotteryId(user2, currentLotteryId, 0, 20, {from: user2});
+
+        // console.log("[INFO]","USER1 Tickets:")
+        // console.log(user1TicketsResponse[0].toString())
+        // console.log(user1TicketsResponse[1].toString())
+        // console.log(user1TicketsResponse[2].toString())       
+       
+        // console.log("[INFO]","USER2 Tickets:")
+        // console.log(user2TicketsResponse[0].toString())
+        // console.log(user2TicketsResponse[1].toString())
+        // console.log(user2TicketsResponse[2].toString()) 
 
         contractDegisBalance = await degisToken.balanceOf(lottery.address)
         user1DegisTokenBalance = await degisToken.balanceOf(user1)
