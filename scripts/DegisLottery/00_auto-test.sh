@@ -1,9 +1,17 @@
-env=rinkeby
-sleep_time1=5400
-sleep_time2=300
-sleep_time3=60
+#env=rinkeby
+#sleep_time1=5400
+#sleep_time2=300
+#sleep_time3=60
+env=development
+sleep_time1=2
+sleep_time2=2
+sleep_time3=2
 
 truffle migrate --network $env  --reset
+echo truffle migrate --network $env  --reset
+
+
+
 sleep $sleep_time3; npx truffle exec scripts/DegisLottery/01_init.js --network $env
 sleep $sleep_time3; npx truffle exec scripts/DegisLottery/02_start-lottery.js --network $env
 sleep $sleep_time3; npx truffle exec scripts/DegisLottery/03_inject-funds.js --network $env
