@@ -53,7 +53,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         uint256 priceTicketInDegis; // 10
         uint256[4] rewardsBreakdown; // 0: 1 matching number // 3: 4 matching numbers
         uint256 treasuryFee; // 500: 5% // 200: 2% // 50: 0.5%
-        uint256[4] rewardPerTicketInBracket; 
+        uint256[4] rewardPerTicketInBracket;
         uint256[4] countWinnersPerBracket;
         uint256[4] countWinnersPerBracketWW;
         uint256 amountCollected;
@@ -84,15 +84,13 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
 
     // lotteryId => (Lucky Number => Total Amount of this number)
     // e.g. in lottery round 3, 10 Tickets are sold with "1234": 3 => (1234 => 10)
-     mapping(uint256 => mapping(uint32 => uint256))
+    mapping(uint256 => mapping(uint32 => uint256))
         private _numberTicketsPerLotteryId;
 
     // Keep track of user ticket ids for a given lotteryId
 
     // userAddress => all tickets he bought in this round
-    mapping(address => uint256[])
-        private _userTicketIds;
-
+    mapping(address => uint256[]) private _userTicketIds;
 
     // only user address
     modifier notContract() {
@@ -115,9 +113,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
     }
 
     event AdminTokenRecovery(address token, uint256 amount);
-    event LotteryClose(
-        uint256 indexed lotteryId
-    );
+    event LotteryClose(uint256 indexed lotteryId);
     event LotteryInjection(uint256 indexed lotteryId, uint256 injectedAmount);
     event LotteryOpen(
         uint256 indexed lotteryId,
@@ -154,11 +150,11 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
     );
 
     /**
-     * @notice Constructor
+     * @notice Constructor function
      * @dev RandomNumberGenerator must be deployed prior to this contract
-     * @param _degisTokenAddress: address of the DEGIS token (for buying tickets)
-     * @param _usdcTokenAddress: address of the USDC token (for prize distribution)
-     * @param _randomGeneratorAddress: address of the RandomGenerator contract used to work with ChainLink VRF
+     * @param _degisTokenAddress Address of the DEGIS token (for buying tickets)
+     * @param _usdcTokenAddress Address of the USDC token (for prize distribution)
+     * @param _randomGeneratorAddress Address of the RandomGenerator contract used to work with ChainLink VRF
      */
     constructor(
         address _degisTokenAddress,
@@ -178,23 +174,23 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
 
     /**
      * @notice Buy tickets for the current lottery round
-     * @param _ticketNumbers: array of ticket numbers between 10,000 and 19,999
-     * @dev Callable by users
+     * @dev You need to transfer the 4-digit number to a 5-digit number to be used here (+10000)
+     * @dev Can not be called by a smart contract
+     * @param _ticketNumbers array of ticket numbers between 10,000 and 19,999
      */
     function buyTickets(uint32[] calldata _ticketNumbers)
         external
-        override
         notContract
         nonReentrant
     {
-        require(_ticketNumbers.length != 0, "no tickets are being bought");
+        require(_ticketNumbers.length != 0, "No tickets are being bought");
         require(
             _ticketNumbers.length <= maxNumberTicketsPerBuyOrClaim,
             "too many tickets are being bought at one time"
         );
         require(
             _lotteries[currentLotteryId].status == Status.Open,
-            "sorry, current lottery is not open"
+            "Sorry, current lottery is not open"
         );
         // require(
         //     block.timestamp < _lotteries[currentLotteryId].endTime,
@@ -214,15 +210,16 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
             amountDegisToTransfer
         );
 
-        for(uint256 i = 0; i < _ticketNumbers.length; i++) {
+        for (uint256 i = 0; i < _ticketNumbers.length; i++) {
             uint32 currentTicketNumber = _ticketNumbers[i];
 
             require(
-                (currentTicketNumber >= MIN_TICKET_NUMBER) && (currentTicketNumber <= MAX_TICKET_NUMBER),
+                (currentTicketNumber >= MIN_TICKET_NUMBER) &&
+                    (currentTicketNumber <= MAX_TICKET_NUMBER),
                 "Ticket number is outside the range"
             );
 
-            // used when drawing the prize 
+            // used when drawing the prize
             _numberTicketsPerLotteryId[currentLotteryId][
                 1 + (currentTicketNumber % 10)
             ]++;
@@ -237,9 +234,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
             ]++;
 
             // Store this ticket number to the user's record
-            _userTicketIds[msg.sender].push(
-                currentTicketId
-            );
+            _userTicketIds[msg.sender].push(currentTicketId);
 
             // Store this ticket number to global ticket state
             _tickets[currentTicketId] = Ticket({
@@ -250,18 +245,23 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
                 redeemLotteryId: 0,
                 priceTicket: _lotteries[currentLotteryId].priceTicketInDegis
             });
+
             _ticketsClaimed[currentTicketId][currentLotteryId] = false;
 
             // Increase total lottery ticket number
             currentTicketId++;
         }
 
-        emit TicketsPurchase(msg.sender, currentLotteryId, _ticketNumbers.length);
+        emit TicketsPurchase(
+            msg.sender,
+            currentLotteryId,
+            _ticketNumbers.length
+        );
     }
 
     /**
      * @notice Redeem tickets for all lottery
-     * @param _ticketIds: array of ticket ids
+     * @param _ticketIds Array of ticket ids
      * @dev Callable by users
      */
     function redeemTickets(uint256[] calldata _ticketIds)
@@ -273,11 +273,11 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         require(_ticketIds.length != 0, "no tickets are being bought");
         require(
             _ticketIds.length <= maxNumberTicketsPerRedeem,
-            "too many tickets are being remeeded at one time"
+            "Too many tickets are being remeeded at one time"
         );
         require(
             _lotteries[currentLotteryId].status == Status.Open,
-            "sorry, current lottery is not open"
+            "Sorry, current lottery is not open"
         );
         // require(
         //     block.timestamp < _lotteries[currentLotteryId].endTime,
@@ -285,18 +285,14 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         // );
 
         uint256 amountDegisToTransfer = 0;
-        for (uint256 i = 0; i < _ticketIds.length; i++)
-        {
+        for (uint256 i = 0; i < _ticketIds.length; i++) {
             uint256 thisTicketId = _ticketIds[i];
-            require(
-                currentTicketId > thisTicketId,
-                "ticketId is too large"
-            );
+            require(currentTicketId > thisTicketId, "ticketId is too large");
             require(
                 msg.sender == _tickets[thisTicketId].owner,
                 "you are not the owner of this ticket"
             );
-            require( 
+            require(
                 _tickets[thisTicketId].isRedeemed == false,
                 "ticket has been redeemed"
             );
@@ -307,7 +303,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
 
             uint32 currentTicketNumber = _tickets[thisTicketId].number;
 
-            // used when drawing the prize 
+            // used when drawing the prize
             _numberTicketsPerLotteryId[_tickets[thisTicketId].buyLotteryId][
                 1 + (currentTicketNumber % 10)
             ]--;
@@ -322,23 +318,22 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
             ]--;
         }
 
-        DegisToken.safeTransfer(
-            address(msg.sender),
-            amountDegisToTransfer
-        );
+        DegisToken.safeTransfer(address(msg.sender), amountDegisToTransfer);
 
         emit TicketsRedeem(msg.sender, currentLotteryId, _ticketIds.length);
     }
 
     /**
      * @notice Claim a set of winning tickets for a lottery
-     * @param _lotteryId: lottery id
+     * @param _lotteryId lottery id
      * @dev Callable by users only, not contract!
      */
-    function claimTickets(
-        uint256 _lotteryId,
-        uint256[] calldata _ticketIds
-    ) external override notContract nonReentrant {
+    function claimTickets(uint256 _lotteryId, uint256[] calldata _ticketIds)
+        external
+        override
+        notContract
+        nonReentrant
+    {
         require(
             _lotteries[_lotteryId].status == Status.Claimable,
             "this round of lottery are not ready for claiming"
@@ -363,8 +358,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
                 "ticketId is too large"
             );
 
-            if(_tickets[thisTicketId].isRedeemed == true)
-            {
+            if (_tickets[thisTicketId].isRedeemed == true) {
                 require(
                     _tickets[thisTicketId].redeemLotteryId > _lotteryId,
                     "ticketId was redeemed"
@@ -375,7 +369,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
                 _ticketsClaimed[thisTicketId][_lotteryId] == false,
                 "prize received"
             );
-            
+
             uint256 rewardForTicketId = _calculateRewardsForTicketId(
                 _lotteryId,
                 thisTicketId
@@ -393,21 +387,20 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         USDCToken.safeTransfer(msg.sender, rewardToTransfer);
         _lotteries[_lotteryId].pendingAwards -= rewardToTransfer;
 
-        emit TicketsClaim(
-            msg.sender,
-            rewardToTransfer,
-            _lotteryId
-        );
+        emit TicketsClaim(msg.sender, rewardToTransfer, _lotteryId);
     }
 
     /**
      * @notice Claim all winning tickets for a lottery
-     * @param _lotteryId: lottery id
+     * @param _lotteryId lottery id
      * @dev Callable by users only, not contract!
      */
-    function claimAllTickets(
-        uint256 _lotteryId
-    ) external override notContract nonReentrant {
+    function claimAllTickets(uint256 _lotteryId)
+        external
+        override
+        notContract
+        nonReentrant
+    {
         require(
             _lotteries[_lotteryId].status == Status.Claimable,
             "this round of lottery are not ready for claiming"
@@ -423,27 +416,26 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
                 "you are not the owner of this ticket"
             );
 
-            if(_tickets[thisTicketId].buyLotteryId > _lotteryId){
+            if (_tickets[thisTicketId].buyLotteryId > _lotteryId) {
                 continue;
             }
-            
-            if(_tickets[thisTicketId].isRedeemed == true)
-            {
-                if(_tickets[thisTicketId].redeemLotteryId <= _lotteryId){
+
+            if (_tickets[thisTicketId].isRedeemed == true) {
+                if (_tickets[thisTicketId].redeemLotteryId <= _lotteryId) {
                     continue;
                 }
             }
 
-            if(_ticketsClaimed[thisTicketId][_lotteryId] == true){
+            if (_ticketsClaimed[thisTicketId][_lotteryId] == true) {
                 continue;
             }
-            
+
             uint256 rewardForTicketId = _calculateRewardsForTicketId(
                 _lotteryId,
                 thisTicketId
             );
 
-            if(rewardForTicketId == 0){
+            if (rewardForTicketId == 0) {
                 continue;
             }
 
@@ -459,16 +451,12 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         USDCToken.safeTransfer(msg.sender, rewardToTransfer);
         _lotteries[_lotteryId].pendingAwards -= rewardToTransfer;
 
-        emit TicketsClaim(
-            msg.sender,
-            rewardToTransfer,
-            _lotteryId
-        );
+        emit TicketsClaim(msg.sender, rewardToTransfer, _lotteryId);
     }
 
     /**
      * @notice Close a lottery
-     * @param _lotteryId: lottery round
+     * @param _lotteryId lottery round
      * @dev Callable only by the operator
      */
     function closeLottery(uint256 _lotteryId)
@@ -502,8 +490,8 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
     /**
      * @notice Draw the final number, calculate reward in Degis for each group, 
                and make this lottery claimable (need to wait for the random generator)
-     * @param _lotteryId: lottery round
-     * @param _autoInjection: reinjects funds into next lottery 
+     * @param _lotteryId lottery round
+     * @param _autoInjection reinjects funds into next lottery 
      * @dev Callable only by the operator
      */
     function drawFinalNumberAndMakeLotteryClaimable(
@@ -522,7 +510,6 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         // Get the final lucky numbers from randomGenerator
         uint32 finalNumber = randomGenerator.viewRandomResult();
 
-
         // Calculate the prize amount given to winners
         // Currently treasuryFee = 0 => amountToWinners = amountCollected
         uint256 amountToWinners = (
@@ -534,7 +521,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         uint256 amountToTreasury;
 
         // Calculate prizes for each bracket, starting from the highest one
-        
+
         // Initialize a number to count addresses in all the previous bracket
         // Ensure that a ticket is not counted several times in different brackets
         uint256 numberAddressesInPreviousBracket = 0;
@@ -547,14 +534,21 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
 
             uint256 numberTickets = 0;
             numberTicketsWW = 0;
-            for(uint32 k = 1; k <= _lotteryId; k++)
-            {
-                numberTickets += _numberTicketsPerLotteryId[k][transformedWinningNumber] * (_lotteryId-k+1);
-                numberTicketsWW += _numberTicketsPerLotteryId[k][transformedWinningNumber];
+            for (uint32 k = 1; k <= _lotteryId; k++) {
+                numberTickets +=
+                    _numberTicketsPerLotteryId[k][transformedWinningNumber] *
+                    (_lotteryId - k + 1);
+                numberTicketsWW += _numberTicketsPerLotteryId[k][
+                    transformedWinningNumber
+                ];
             }
 
-            _lotteries[_lotteryId].countWinnersPerBracket[j] = numberTickets - numberAddressesInPreviousBracket;
-            _lotteries[_lotteryId].countWinnersPerBracketWW[j] = numberTicketsWW - numberAddressesInPreviousBracketWW;
+            _lotteries[_lotteryId].countWinnersPerBracket[j] =
+                numberTickets -
+                numberAddressesInPreviousBracket;
+            _lotteries[_lotteryId].countWinnersPerBracketWW[j] =
+                numberTicketsWW -
+                numberAddressesInPreviousBracketWW;
 
             // If there are winners for this _bracket
             if (numberTickets - numberAddressesInPreviousBracket != 0) {
@@ -563,7 +557,8 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
                     _lotteries[_lotteryId].rewardPerTicketInBracket[j] =
                         ((_lotteries[_lotteryId].rewardsBreakdown[j] *
                             amountToWinners) /
-                            (numberTickets - numberAddressesInPreviousBracket)) /
+                            (numberTickets -
+                                numberAddressesInPreviousBracket)) /
                         10000;
                 }
                 // No winners, prize added to the amount to withdraw to treasury
@@ -584,7 +579,9 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         // Update internal statuses for this lottery round
         _lotteries[_lotteryId].finalNumber = finalNumber;
         _lotteries[_lotteryId].status = Status.Claimable;
-        _lotteries[_lotteryId].pendingAwards = amountToWinners - amountToTreasury;
+        _lotteries[_lotteryId].pendingAwards =
+            amountToWinners -
+            amountToTreasury;
 
         // If autoInjection, all unused prize will be rolled to next round
         if (_autoInjection) {
@@ -601,7 +598,10 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
             USDCToken.safeTransfer(treasuryAddress, amountToTreasury);
         }
 
-        require(_calculateTotalAwards() == USDCToken.balanceOf(address(this)), "USDC not balance");
+        require(
+            _calculateTotalAwards() == USDCToken.balanceOf(address(this)),
+            "USDC not balance"
+        );
 
         emit LotteryNumberDrawn(
             currentLotteryId,
@@ -615,7 +615,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
      * @dev The calls to functions are used to verify the new generator implements them properly.
      * It is necessary to wait for the VRF response before starting a round.
      * Callable only by the contract owner
-     * @param _randomGeneratorAddress: address of the random generator
+     * @param _randomGeneratorAddress address of the random generator
      */
     function changeRandomGenerator(address _randomGeneratorAddress)
         external
@@ -640,8 +640,8 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
 
     /**
      * @notice Inject funds
-     * @param _lotteryId: lottery round
-     * @param _amount: amount to inject 
+     * @param _lotteryId lottery round
+     * @param _amount amount to inject 
      * @dev Callable by owner(incentive) or injector address(insurancePool income)
             First transfer USDC and then call this function to record
      */
@@ -656,18 +656,11 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         );
 
         // Transfer degis tokens to this contract (need approval)
-        USDCToken.safeTransferFrom(
-            address(msg.sender),
-            address(this),
-            _amount
-        );
+        USDCToken.safeTransferFrom(address(msg.sender), address(this), _amount);
 
         uint256 USDC_Balance = USDCToken.balanceOf(address(this));
         _lotteries[_lotteryId].amountCollected += _amount;
-        require(
-            _calculateTotalAwards() == USDC_Balance,
-            "the amount is wrong"
-        );         
+        require(_calculateTotalAwards() == USDC_Balance, "the amount is wrong");
 
         emit LotteryInjection(_lotteryId, _amount);
     }
@@ -675,10 +668,10 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
     /**
      * @notice Start the lottery
      * @dev Callable only by operator
-     * @param _endTime: endTime of the lottery (timestamp in s)
-     * @param _priceTicketInDegis: price of a ticket in DEGIS
-     * @param _rewardsBreakdown: breakdown of rewards per bracket (must sum to 10,000)(100 <=> 1)
-     * @param _treasuryFee: treasury fee (10,000 = 100%, 100 = 1%) (set as 0)
+     * @param _endTime endTime of the lottery (timestamp in s)
+     * @param _priceTicketInDegis price of a ticket in DEGIS
+     * @param _rewardsBreakdown breakdown of rewards per bracket (must sum to 10,000)(100 <=> 1)
+     * @param _treasuryFee treasury fee (10,000 = 100%, 100 = 1%) (set as 0)
      */
     function startLottery(
         uint256 _endTime,
@@ -761,8 +754,8 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
     /**
      * @notice Recover wrong tokens sent to the contract, only by the owner
                All tokens except Degis and USDC are wrong tokens
-     * @param _tokenAddress: the address of the token to withdraw
-     * @param _tokenAmount: token amount to withdraw
+     * @param _tokenAddress the address of the token to withdraw
+     * @param _tokenAmount token amount to withdraw
      */
     function recoverWrongTokens(address _tokenAddress, uint256 _tokenAmount)
         external
@@ -778,8 +771,8 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
     /**
      * @notice Set the upper/lower limit of the ticket price
      * @dev Only callable by the owner
-     * @param _minPriceTicketInDegis: minimum price of a ticket in Degis
-     * @param _maxPriceTicketInDegis: maximum price of a ticket in Degis
+     * @param _minPriceTicketInDegis minimum price of a ticket in Degis
+     * @param _maxPriceTicketInDegis maximum price of a ticket in Degis
      */
     function setMinAndMaxTicketPrice(
         uint256 _minPriceTicketInDegis,
@@ -809,9 +802,9 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
     /**
      * @notice Set operator, treasury, and injector addresses
      * @dev Only callable by the owner
-     * @param _operatorAddress: address of the operator
-     * @param _treasuryAddress: address of the treasury
-     * @param _injectorAddress: address of the injector
+     * @param _operatorAddress address of the operator
+     * @param _treasuryAddress address of the treasury
+     * @param _injectorAddress address of the injector
      */
     function setOperatorAndTreasuryAndInjectorAddresses(
         address _operatorAddress,
@@ -834,9 +827,9 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
     }
 
     /**
-     * @notice Calculate price of a set of tickets
-     * @param _priceTicket price of one ticket (in Degis)
-     * @param _numberTickets number of tickets to buy
+     * @notice Calculate the total price of a set of tickets
+     * @param _priceTicket Price per ticket (in Degis)
+     * @param _numberTickets Number of tickets to buy
      */
     function calculateTotalPriceForBulkTickets(
         uint256 _priceTicket,
@@ -850,7 +843,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
     /**
      * @notice View current lottery id
      */
-    function viewCurrentLotteryId() external view override returns (uint256) {
+    function viewCurrentLotteryId() external view returns (uint256) {
         return currentLotteryId;
     }
 
@@ -869,14 +862,10 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
     /**
      * @notice View lottery information
      */
-    function viewAllLottery()
-        external
-        view
-        returns (Lottery[] memory)
-    {
+    function viewAllLottery() external view returns (Lottery[] memory) {
         Lottery[] memory allLottery = new Lottery[](currentLotteryId);
-        for (uint256 i = 1; i <= currentLotteryId; i++){
-            allLottery[i-1] =  _lotteries[i];
+        for (uint256 i = 1; i <= currentLotteryId; i++) {
+            allLottery[i - 1] = _lotteries[i];
         }
         return allLottery;
     }
@@ -908,10 +897,11 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
      * @param _lotteryId: lottery round
      * @param _ticketId: ticket id
      */
-    function viewRewardsForTicketId(
-        uint256 _lotteryId,
-        uint256 _ticketId
-    ) external view returns (uint256) {
+    function viewRewardsForTicketId(uint256 _lotteryId, uint256 _ticketId)
+        external
+        view
+        returns (uint256)
+    {
         // Check lottery is in claimable status
         if (_lotteries[_lotteryId].status != Status.Claimable) {
             return 0;
@@ -921,8 +911,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
             _tickets[_ticketId].buyLotteryId <= _lotteryId,
             "ticketId is too large"
         );
-        if(_tickets[_ticketId].isRedeemed == true)
-        {
+        if (_tickets[_ticketId].isRedeemed == true) {
             require(
                 _tickets[_ticketId].redeemLotteryId > _lotteryId,
                 "ticketId was redeemed"
@@ -935,8 +924,9 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
 
         // Check ticketId is within range
         if (
-            (_tickets[_ticketId].buyLotteryId > _lotteryId) || 
-            (_tickets[_ticketId].isRedeemed == true && (_tickets[_ticketId].redeemLotteryId <= _lotteryId)) || 
+            (_tickets[_ticketId].buyLotteryId > _lotteryId) ||
+            (_tickets[_ticketId].isRedeemed == true &&
+                (_tickets[_ticketId].redeemLotteryId <= _lotteryId)) ||
             (_ticketsClaimed[_ticketId][_lotteryId] == true)
         ) {
             return 0;
@@ -944,8 +934,6 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
 
         return _calculateRewardsForTicketId(_lotteryId, _ticketId);
     }
-
-
 
     /**
      * @notice View user ticket ids, numbers, and statuses of user for a given lottery
@@ -971,9 +959,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         )
     {
         uint256 length = _size;
-        uint256 numberTicketsBoughtAtLotteryId = _userTicketIds[
-            _user
-        ].length;
+        uint256 numberTicketsBoughtAtLotteryId = _userTicketIds[_user].length;
 
         if (length > (numberTicketsBoughtAtLotteryId - _cursor)) {
             length = numberTicketsBoughtAtLotteryId - _cursor;
@@ -984,9 +970,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         bool[] memory ticketStatuses = new bool[](length);
 
         for (uint256 i = 0; i < length; i++) {
-            lotteryTicketIds[i] = _userTicketIds[_user][
-                i + _cursor
-            ];
+            lotteryTicketIds[i] = _userTicketIds[_user][i + _cursor];
             ticketNumbers[i] = _tickets[lotteryTicketIds[i]].number;
             ticketStatuses[i] = _tickets[lotteryTicketIds[i]].isRedeemed;
         }
@@ -1004,23 +988,18 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
      * @param _user: user address
      */
     // e.g. Alice, round 10, check her ticket-30 to ticket-35
-    function viewUserInfo(
-        address _user
-    )
+    function viewUserInfo(address _user)
         external
         view
-        returns (
-            uint256[] memory,
-            Ticket[] memory
-        )
+        returns (uint256[] memory, Ticket[] memory)
     {
         uint256 length = _userTicketIds[_user].length;
 
-        uint256[] memory ticketIds = new uint256[](length); 
+        uint256[] memory ticketIds = new uint256[](length);
         Ticket[] memory userTickets = new Ticket[](length);
 
-        // uint32[] memory ticketNumbers = new uint32[](length); 
-        // bool[] memory ticketStatuses = new bool[](length); 
+        // uint32[] memory ticketNumbers = new uint32[](length);
+        // bool[] memory ticketStatuses = new bool[](length);
         // uint32[] memory ticketBuy = new uint32[](length);
         // uint32[] memory ticketRedeem = new uint32[](length);
 
@@ -1029,10 +1008,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
             userTickets[i] = _tickets[ticketIds[i]];
         }
 
-        return (
-            ticketIds,
-            userTickets
-        );
+        return (ticketIds, userTickets);
     }
 
     /**
@@ -1040,15 +1016,21 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
      * @param _lotteryId: lottery id
      * @dev Callable by users only, not contract!
      */
-    struct viewClaimAllTicketInfo { 
-      uint256 ticketId; 
-      uint256 ticketNumber; 
-      uint256 ticketReward; 
-      bool ticketClaimed; 
+    struct viewClaimAllTicketInfo {
+        uint256 ticketId;
+        uint256 ticketNumber;
+        uint256 ticketReward;
+        bool ticketClaimed;
     }
 
-    function viewClaimAllTickets(uint256 _lotteryId) external view
-    returns (uint256, uint256, viewClaimAllTicketInfo[] memory)
+    function viewClaimAllTickets(uint256 _lotteryId)
+        external
+        view
+        returns (
+            uint256,
+            uint256,
+            viewClaimAllTicketInfo[] memory
+        )
     {
         require(
             _lotteries[_lotteryId].status == Status.Claimable,
@@ -1057,7 +1039,8 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
 
         uint256 length = _userTicketIds[msg.sender].length;
         uint256 rewardToTransfer = 0;
-        viewClaimAllTicketInfo[] memory tmpTicketInfo = new viewClaimAllTicketInfo[](length);
+        viewClaimAllTicketInfo[]
+            memory tmpTicketInfo = new viewClaimAllTicketInfo[](length);
 
         uint256 num = 0;
         for (uint256 i = 0; i < _userTicketIds[msg.sender].length; i++) {
@@ -1068,48 +1051,49 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
                 "you are not the owner of this ticket"
             );
 
-            if(_tickets[thisTicketId].buyLotteryId > _lotteryId){
+            if (_tickets[thisTicketId].buyLotteryId > _lotteryId) {
                 continue;
             }
-            
-            if(_tickets[thisTicketId].isRedeemed == true)
-            {
-                if(_tickets[thisTicketId].redeemLotteryId <= _lotteryId){
+
+            if (_tickets[thisTicketId].isRedeemed == true) {
+                if (_tickets[thisTicketId].redeemLotteryId <= _lotteryId) {
                     continue;
                 }
             }
 
-            if(_ticketsClaimed[thisTicketId][_lotteryId] == true){
+            if (_ticketsClaimed[thisTicketId][_lotteryId] == true) {
                 continue;
             }
-            
+
             uint256 rewardForTicketId = _calculateRewardsForTicketId(
                 _lotteryId,
                 thisTicketId
             );
 
-            if(rewardForTicketId == 0){
+            if (rewardForTicketId == 0) {
                 continue;
             }
 
             tmpTicketInfo[num].ticketId = thisTicketId;
             tmpTicketInfo[num].ticketNumber = _tickets[thisTicketId].number;
             tmpTicketInfo[num].ticketReward = rewardForTicketId;
-            tmpTicketInfo[num].ticketClaimed = _ticketsClaimed[thisTicketId][_lotteryId];
+            tmpTicketInfo[num].ticketClaimed = _ticketsClaimed[thisTicketId][
+                _lotteryId
+            ];
             num += 1;
 
             // Increase the reward to transfer
             rewardToTransfer += rewardForTicketId;
         }
 
-        viewClaimAllTicketInfo[] memory ticketInfo = new viewClaimAllTicketInfo[](num);
+        viewClaimAllTicketInfo[]
+            memory ticketInfo = new viewClaimAllTicketInfo[](num);
 
-        for (uint256 i = 0; i < num; i++)
-        {
+        for (uint256 i = 0; i < num; i++) {
             ticketInfo[i] = tmpTicketInfo[i];
         }
 
-        return( _lotteryId, rewardToTransfer, ticketInfo);
+        return (_lotteryId, rewardToTransfer, ticketInfo);
     }
 
     /**
@@ -1117,22 +1101,22 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
      * @param _lotteryId: lottery round
      * @param _ticketId: ticket id
      */
-    function _calculateRewardsForTicketId(
-        uint256 _lotteryId,
-        uint256 _ticketId
-    ) internal view returns (uint256) {
-        
-        if(_tickets[_ticketId].buyLotteryId > _lotteryId) {
+    function _calculateRewardsForTicketId(uint256 _lotteryId, uint256 _ticketId)
+        internal
+        view
+        returns (uint256)
+    {
+        if (_tickets[_ticketId].buyLotteryId > _lotteryId) {
             return 0;
         }
 
-        if(_tickets[_ticketId].isRedeemed == true) {
-            if(_tickets[_ticketId].redeemLotteryId <= _lotteryId) {
+        if (_tickets[_ticketId].isRedeemed == true) {
+            if (_tickets[_ticketId].redeemLotteryId <= _lotteryId) {
                 return 0;
             }
         }
 
-        if(_ticketsClaimed[_ticketId][_lotteryId] == true) {
+        if (_ticketsClaimed[_ticketId][_lotteryId] == true) {
             return 0;
         }
 
@@ -1143,51 +1127,51 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         uint32 winningTicketNumber = _lotteries[_lotteryId].finalNumber;
 
         uint32 _bracket = 5;
-        for(uint32 i = 1; i <= 4; i++) {
-            if(winningTicketNumber % (uint32(10)**i) == userNumber % (uint32(10)**i)) {
-                _bracket = i - 1 ;
+        for (uint32 i = 1; i <= 4; i++) {
+            if (
+                winningTicketNumber % (uint32(10)**i) ==
+                userNumber % (uint32(10)**i)
+            ) {
+                _bracket = i - 1;
             }
         }
 
-        if(_bracket == 5)
-        {
+        if (_bracket == 5) {
             return 0;
         }
 
         // Apply transformation to verify the claim provided by the user is true
         uint32 transformedWinningNumber = _bracketCalculator[_bracket] +
-            (winningTicketNumber % (uint32(10)**(_bracket+1)));
+            (winningTicketNumber % (uint32(10)**(_bracket + 1)));
 
         uint32 transformedUserNumber = _bracketCalculator[_bracket] +
-            (userNumber % (uint32(10)**(_bracket+1)));
+            (userNumber % (uint32(10)**(_bracket + 1)));
 
         // Confirm that the two transformed numbers are the same
         if (transformedWinningNumber == transformedUserNumber) {
-            return _lotteries[_lotteryId].rewardPerTicketInBracket[_bracket] * (_lotteryId - _tickets[_ticketId].buyLotteryId + 1);
+            return
+                _lotteries[_lotteryId].rewardPerTicketInBracket[_bracket] *
+                (_lotteryId - _tickets[_ticketId].buyLotteryId + 1);
         } else {
             return 0;
         }
     }
 
-
     /**
      * @notice Calculate all awards
      */
-    function _calculateTotalAwards() internal view returns(uint256)
-    {
+    function _calculateTotalAwards() internal view returns (uint256) {
         uint256 amount = 0;
 
-        for(uint256 i = 0; i < currentLotteryId; i++)
-        {
+        for (uint256 i = 0; i < currentLotteryId; i++) {
             amount += _lotteries[i].pendingAwards;
         }
 
-        if(_lotteries[currentLotteryId].status == Status.Claimable)
-        {
-            amount += _lotteries[currentLotteryId].pendingAwards + pendingInjectionNextLottery;
-        }
-        else
-        {
+        if (_lotteries[currentLotteryId].status == Status.Claimable) {
+            amount +=
+                _lotteries[currentLotteryId].pendingAwards +
+                pendingInjectionNextLottery;
+        } else {
             amount += _lotteries[currentLotteryId].amountCollected;
         }
 
