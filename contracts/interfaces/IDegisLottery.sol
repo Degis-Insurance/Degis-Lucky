@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.9;
 
 interface IDegisLottery {
     /**
@@ -7,16 +7,14 @@ interface IDegisLottery {
      * @param _ticketNumbers: array of ticket numbers between 10,000 and 19,999
      * @dev Callable by users
      */
-    function buyTickets(uint32[] calldata _ticketNumbers)
-        external;
+    function buyTickets(uint32[] calldata _ticketNumbers) external;
 
     /**
      * @notice Redeem tickets for all lottery
      * @param _ticketIds: array of ticket ids
      * @dev Callable by users
      */
-    function redeemTickets(uint256[] calldata _ticketIds)
-        external;
+    function redeemTickets(uint256[] calldata _ticketIds) external;
 
     /**
      * @notice Claim a set of winning tickets for a lottery
@@ -24,19 +22,15 @@ interface IDegisLottery {
      * @param _ticketIds: array of ticket ids
      * @dev Callable by users only, not contract!
      */
-    function claimTickets(
-        uint256 _lotteryId,
-        uint256[] calldata _ticketIds
-    ) external;
+    function claimTickets(uint256 _lotteryId, uint256[] calldata _ticketIds)
+        external;
 
     /**
      * @notice Claim all winning tickets for a lottery
      * @param _lotteryId: lottery id
      * @dev Callable by users only, not contract!
      */
-    function claimAllTickets(
-        uint256 _lotteryId
-    ) external;
+    function claimAllTickets(uint256 _lotteryId) external;
 
     /**
      * @notice Close lottery
@@ -82,5 +76,5 @@ interface IDegisLottery {
     /**
      * @notice View current lottery id
      */
-    function viewCurrentLotteryId() external returns (uint256);
+    function viewCurrentLotteryId() external view returns (uint256);
 }
