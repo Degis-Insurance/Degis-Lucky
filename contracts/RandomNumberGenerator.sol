@@ -43,11 +43,13 @@ contract RandomNumberGenerator is
      * @notice Request randomness from Chainlink VRF
      */
     function getRandomNumber() external override {
-        require(msg.sender == DegisLottery, "Only DegisLottery");
-        require(keyHash != bytes32(0), "Must have valid key hash");
-        require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK tokens");
+        // require(msg.sender == DegisLottery, "Only DegisLottery");
+        // require(keyHash != bytes32(0), "Must have valid key hash");
+        // require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK tokens");
 
-        latestRequestId = requestRandomness(keyHash, fee);
+        // latestRequestId = requestRandomness(keyHash, fee);
+        randomResult = 1999;
+        latestLotteryId = IDegisLottery(DegisLottery).viewCurrentLotteryId();
     }
 
     /**

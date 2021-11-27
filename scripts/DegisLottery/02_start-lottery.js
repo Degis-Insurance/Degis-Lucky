@@ -28,7 +28,7 @@ module.exports = async callback => {
 			const tx1 = await lottery.startLottery(
 				timestamp,
 				web3.utils.toBN(10e18),
-				[500, 1500, 2000, 6000],
+				[2000, 2000, 2000, 2000],
 				0,
 				{ from: address }
 			  );
