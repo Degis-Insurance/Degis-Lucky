@@ -56,7 +56,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         uint256 priceTicketInDegis; // 10
         uint256[4] rewardsBreakdown; // 0: 1 matching number // 3: 4 matching numbers
         uint256 treasuryFee; // 500: 5% // 200: 2% // 50: 0.5%
-        uint256[4] rewardPerTicketInBracket; 
+        uint256[4] rewardPerTicketInBracket;
         uint256[4] countWinnersPerBracket;
         uint256[4] countWinnersPerBracketWW;
         uint256 amountCollected;
@@ -135,6 +135,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         address treasury,
         address injector
     );
+
     event NewRandomGenerator(address indexed randomGenerator);
     event TicketsPurchase(
         address indexed buyer,
@@ -487,10 +488,9 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         emit LotteryClose(_lotteryId);
     }
 
-    function int2ln(uint256 x) internal pure returns (uint256)
-    {
+    function int2ln(uint256 x) internal pure returns (uint256) {
         // return (x-1)*10000;
-        uint256 y = 10000; 
+        uint256 y = 10000;
         int128 x_128 = x.fromUInt();
         int128 y_128 = y.fromUInt();
         int128 ln_x_128 = x_128.ln();
@@ -524,7 +524,6 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         // Get the final lucky numbers from randomGenerator
         uint32 finalNumber = randomGenerator.viewRandomResult();
 
-
         // Calculate the prize amount given to winners
         // Currently treasuryFee = 0 => amountToWinners = amountCollected
         uint256 amountToWinners = (
@@ -546,10 +545,13 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
 
             uint256 numberTickets = 0;
             numberTicketsWW = 0;
-            for(uint32 k = 1; k <= _lotteryId; k++)
-            {
-                numberTickets += _numberTicketsPerLotteryId[k][transformedWinningNumber] * (int2ln(_lotteryId-k+1)+10000);
-                numberTicketsWW += _numberTicketsPerLotteryId[k][transformedWinningNumber];
+            for (uint32 k = 1; k <= _lotteryId; k++) {
+                numberTickets +=
+                    _numberTicketsPerLotteryId[k][transformedWinningNumber] *
+                    (int2ln(_lotteryId - k + 1) + 10000);
+                numberTicketsWW += _numberTicketsPerLotteryId[k][
+                    transformedWinningNumber
+                ];
             }
 
             _lotteries[_lotteryId].countWinnersPerBracket[j] =
@@ -569,13 +571,14 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
                             (numberTickets -
                                 numberAddressesInPreviousBracket)) /
                         10000;
-                    _lotteries[_lotteryId].pendingAwards += _lotteries[_lotteryId].rewardsBreakdown[j] * amountToWinners / 10000;
+                    _lotteries[_lotteryId].pendingAwards +=
+                        (_lotteries[_lotteryId].rewardsBreakdown[j] *
+                            amountToWinners) /
+                        10000;
                 }
                 // No winners, prize added to the amount to withdraw to treasury
             } else {
                 _lotteries[_lotteryId].rewardPerTicketInBracket[j] = 0;
-
-
             }
 
             // Update numberAddressesInPreviousBracket
@@ -586,9 +589,11 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         // Update internal statuses for this lottery round
         _lotteries[_lotteryId].finalNumber = finalNumber;
         _lotteries[_lotteryId].status = Status.Claimable;
-        
+
         uint256 amountToTreasury = 0;
-        amountToTreasury = amountToWinners - _lotteries[_lotteryId].pendingAwards;
+        amountToTreasury =
+            amountToWinners -
+            _lotteries[_lotteryId].pendingAwards;
 
         // If autoInjection, all unused prize will be rolled to next round
         if (_autoInjection) {
@@ -1153,7 +1158,8 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         if (transformedWinningNumber == transformedUserNumber) {
             return
                 _lotteries[_lotteryId].rewardPerTicketInBracket[_bracket] *
-                (_lotteryId - _tickets[_ticketId].buyLotteryId + 1);
+                (int2ln(_lotteryId - _tickets[_ticketId].buyLotteryId + 1) +
+                    10000);
         } else {
             return 0;
         }
