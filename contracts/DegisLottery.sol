@@ -9,9 +9,12 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IDegisLottery.sol";
 import "./interfaces/IRandomNumberGenerator.sol";
+import "./lib/ABDKMath64x64.sol";
 
 contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
     using SafeERC20 for IERC20;
+    using ABDKMath64x64 for uint256;
+    using ABDKMath64x64 for int128;
 
     address public injectorAddress;
     address public operatorAddress;
@@ -132,6 +135,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         address treasury,
         address injector
     );
+
     event NewRandomGenerator(address indexed randomGenerator);
     event TicketsPurchase(
         address indexed buyer,
@@ -484,6 +488,16 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         emit LotteryClose(_lotteryId);
     }
 
+    function int2ln(uint256 x) internal pure returns (uint256) {
+        // return (x-1)*10000;
+        uint256 y = 10000;
+        int128 x_128 = x.fromUInt();
+        int128 y_128 = y.fromUInt();
+        int128 ln_x_128 = x_128.ln();
+        ln_x_128 = ln_x_128.mul(y_128);
+        return ln_x_128.toUInt();
+    }
+
     uint256 numberAddressesInPreviousBracketWW = 0;
     uint256 numberTicketsWW = 0;
 
@@ -517,16 +531,13 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
                 (10000 - _lotteries[_lotteryId].treasuryFee))
         ) / 10000;
 
-        // Initializes the amount to treasury (currently 0)
-        uint256 amountToTreasury;
-
         // Calculate prizes for each bracket, starting from the highest one
 
         // Initialize a number to count addresses in all the previous bracket
         // Ensure that a ticket is not counted several times in different brackets
         uint256 numberAddressesInPreviousBracket = 0;
         numberAddressesInPreviousBracketWW = 0;
-
+        _lotteries[_lotteryId].pendingAwards = 0;
         for (uint32 i = 0; i < 4; i++) {
             uint32 j = 3 - i;
             uint32 transformedWinningNumber = _bracketCalculator[j] +
@@ -537,7 +548,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
             for (uint32 k = 1; k <= _lotteryId; k++) {
                 numberTickets +=
                     _numberTicketsPerLotteryId[k][transformedWinningNumber] *
-                    (_lotteryId - k + 1);
+                    (int2ln(_lotteryId - k + 1) + 10000);
                 numberTicketsWW += _numberTicketsPerLotteryId[k][
                     transformedWinningNumber
                 ];
@@ -560,15 +571,14 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
                             (numberTickets -
                                 numberAddressesInPreviousBracket)) /
                         10000;
+                    _lotteries[_lotteryId].pendingAwards +=
+                        (_lotteries[_lotteryId].rewardsBreakdown[j] *
+                            amountToWinners) /
+                        10000;
                 }
                 // No winners, prize added to the amount to withdraw to treasury
             } else {
                 _lotteries[_lotteryId].rewardPerTicketInBracket[j] = 0;
-
-                amountToTreasury +=
-                    (_lotteries[_lotteryId].rewardsBreakdown[j] *
-                        amountToWinners) /
-                    10000;
             }
 
             // Update numberAddressesInPreviousBracket
@@ -579,9 +589,11 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         // Update internal statuses for this lottery round
         _lotteries[_lotteryId].finalNumber = finalNumber;
         _lotteries[_lotteryId].status = Status.Claimable;
-        _lotteries[_lotteryId].pendingAwards =
+
+        uint256 amountToTreasury = 0;
+        amountToTreasury =
             amountToWinners -
-            amountToTreasury;
+            _lotteries[_lotteryId].pendingAwards;
 
         // If autoInjection, all unused prize will be rolled to next round
         if (_autoInjection) {
@@ -703,8 +715,8 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
             (_rewardsBreakdown[0] +
                 _rewardsBreakdown[1] +
                 _rewardsBreakdown[2] +
-                _rewardsBreakdown[3]) == 10000,
-            "total rewards of each bracket must equal 10000"
+                _rewardsBreakdown[3]) <= 10000,
+            "total rewards of each bracket must less than or equal to 10000"
         );
 
         currentLotteryId++;
@@ -998,11 +1010,6 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         uint256[] memory ticketIds = new uint256[](length);
         Ticket[] memory userTickets = new Ticket[](length);
 
-        // uint32[] memory ticketNumbers = new uint32[](length);
-        // bool[] memory ticketStatuses = new bool[](length);
-        // uint32[] memory ticketBuy = new uint32[](length);
-        // uint32[] memory ticketRedeem = new uint32[](length);
-
         for (uint256 i = 0; i < length; i++) {
             ticketIds[i] = _userTicketIds[_user][i];
             userTickets[i] = _tickets[ticketIds[i]];
@@ -1151,7 +1158,8 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         if (transformedWinningNumber == transformedUserNumber) {
             return
                 _lotteries[_lotteryId].rewardPerTicketInBracket[_bracket] *
-                (_lotteryId - _tickets[_ticketId].buyLotteryId + 1);
+                (int2ln(_lotteryId - _tickets[_ticketId].buyLotteryId + 1) +
+                    10000);
         } else {
             return 0;
         }
