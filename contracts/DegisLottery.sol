@@ -152,6 +152,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         uint256 amount,
         uint256 indexed lotteryId
     );
+    event EmergencyWithdraw(address _receiver, uint256 _amount);
 
     /**
      * @notice Constructor function
@@ -667,7 +668,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
             "the lottery round is not open, choose the right round"
         );
 
-        // Transfer degis tokens to this contract (need approval)
+        // Transfer usd tokens to this contract (need approval)
         USDCToken.safeTransferFrom(address(msg.sender), address(this), _amount);
 
         uint256 USDC_Balance = USDCToken.balanceOf(address(this));
@@ -675,6 +676,20 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         require(_calculateTotalAwards() == USDC_Balance, "the amount is wrong");
 
         emit LotteryInjection(_lotteryId, _amount);
+    }
+
+    function emergencyWithdraw(address _receiver, uint256 _amount)
+        external
+        onlyOwner
+    {
+        require(
+            USDCToken.balanceOf(address(this)) <= _amount,
+            "Withdraw amount exceeds balance"
+        );
+
+        USDCToken.safeTransfer(_receiver, _amount);
+
+        emit EmergencyWithdraw(_receiver, _amount);
     }
 
     /**
