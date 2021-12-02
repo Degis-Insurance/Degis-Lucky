@@ -17,8 +17,8 @@ const MockUSD = artifacts.require("lib/MockUSD");
 const RandomNumberGenerator = artifacts.require("RandomNumberGenerator");
 const DegisLottery = artifacts.require("DegisLottery");
 
-const usd_rinkeby = "0x93424a368464763b244b761CBA4812D33B5e2f0b";
-const degis = "0x0C970444856f143728e791fbfC3b5f6AD7f417Dd";
+const usd_rinkeby = "0xAc141573202C0c07DFE432EAa1be24a9cC97d358";
+const degis = "0x6d3036117de5855e1ecd338838FF9e275009eAc2";
 
 const fs = require("fs");
 
