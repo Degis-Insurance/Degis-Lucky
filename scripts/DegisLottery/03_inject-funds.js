@@ -18,7 +18,6 @@ module.exports = async (callback) => {
     const mockUSD = await MockUSD.at(usd_rinkeby);
     const user0 = (await web3.eth.getAccounts())[0];
     const lottery = await DegisLottery.deployed();
-    s;
 
     const amount = web3.utils.toWei("100", "ether");
     const currentLotteryId = await lottery.viewCurrentLotteryId();
