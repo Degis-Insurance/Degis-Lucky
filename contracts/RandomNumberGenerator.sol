@@ -3,6 +3,7 @@ pragma solidity 0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
 import "./interfaces/IRandomNumberGenerator.sol";
 import "./interfaces/IDegisLottery.sol";
@@ -13,6 +14,7 @@ contract RandomNumberGenerator is
     IRandomNumberGenerator,
     Ownable
 {
+    using Strings for uint256;
     using SafeERC20 for IERC20;
 
     address public DegisLottery;
@@ -45,9 +47,21 @@ contract RandomNumberGenerator is
     function getRandomNumber() external override {
         require(msg.sender == DegisLottery, "Only DegisLottery");
         require(keyHash != bytes32(0), "Must have valid key hash");
-        require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK tokens");
+        // require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK tokens");
 
-        latestRequestId = requestRandomness(keyHash, fee);
+        //*********************************//
+        // This part is only for test on Fuji Testnet because there is no VRF currently
+        string memory randInput = string(
+            abi.encodePacked((block.timestamp).toString(), address(this))
+        );
+        randomResult = uint32(10000 + (_rand(randInput) % 10000));
+        //*********************************//
+
+        // latestRequestId = requestRandomness(keyHash, fee);
+    }
+
+    function _rand(string memory input) internal pure returns (uint256) {
+        return uint256(keccak256(abi.encodePacked(input)));
     }
 
     /**
