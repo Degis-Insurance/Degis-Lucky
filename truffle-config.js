@@ -8,6 +8,11 @@ if (result.error) {
 console.log(result.parsed);
 var mnemonic = process.env.mnemonic;
 var infuraKey = process.env.infuraKey;
+var phrase_fuji = process.env.phrase;
+
+const fuji_provider = new Web3.providers.HttpProvider(
+  `https://api.avax-test.network/ext/bc/C/rpc`
+);
 
 module.exports = {
   networks: {
@@ -15,15 +20,16 @@ module.exports = {
       provider: () => {
         return new HDWalletProvider({
           mnemonic: {
-            phrase: mnemonic,
+            phrase: phrase_fuji,
           },
           numberOfAddresses: 1,
           shareNonce: true,
-          providerOrUrl: provider,
+          providerOrUrl: fuji_provider,
         });
       },
       network_id: "*",
       timeoutBlocks: 50000,
+      skipDryRun: true,
     },
     development: {
       host: "127.0.0.1", // Localhost (default: none)
