@@ -58,6 +58,8 @@ contract RandomNumberGenerator is
         //*********************************//
 
         // latestRequestId = requestRandomness(keyHash, fee);
+
+        latestLotteryId = IDegisLottery(DegisLottery).viewCurrentLotteryId();
     }
 
     function _rand(string memory input) internal pure returns (uint256) {

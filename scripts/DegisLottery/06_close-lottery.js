@@ -4,8 +4,8 @@ const DegisLottery = artifacts.require("DegisLottery");
 const RandomNumberGenerator = artifacts.require("RandomNumberGenerator");
 const LinkTokenInterface = artifacts.require("LinkTokenInterface");
 
-const degis_rinkeby = "0x6d3036117de5855e1ecd338838FF9e275009eAc2";
-const usd_rinkeby = "0xAc141573202C0c07DFE432EAa1be24a9cC97d358";
+const degis_rinkeby = "0x0f799713D3C34f1Cbf8E1530c53e58a59D9F6872";
+const usd_rinkeby = "0xF886dDc935E8DA5Da26f58f5D266EFdfDA1AD260";
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -20,8 +20,9 @@ module.exports = async (callback) => {
     console.log(lottery.address);
 
     const rand = await RandomNumberGenerator.deployed();
-    // await rand.setLotteryAddress(lottery.address);
+    await rand.setLotteryAddress(lottery.address);
     let address = (await web3.eth.getAccounts())[0];
+    console.log("my account", address);
     const currentLotteryId = await lottery.viewCurrentLotteryId();
     const tx1 = await lottery.closeLottery(currentLotteryId, { from: address });
     console.log(tx1.tx);
