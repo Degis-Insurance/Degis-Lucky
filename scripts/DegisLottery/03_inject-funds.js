@@ -19,7 +19,7 @@ module.exports = async (callback) => {
     const user0 = (await web3.eth.getAccounts())[0];
     const lottery = await DegisLottery.deployed();
 
-    const amount = web3.utils.toWei("10000", "ether");
+    const amount = web3.utils.toWei("113880", "ether");
     const currentLotteryId = await lottery.viewCurrentLotteryId();
     await mockUSD.approve(lottery.address, amount, { from: user0 });
     await lottery.injectFunds(currentLotteryId, amount);

@@ -612,7 +612,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         }
 
         require(
-            _calculateTotalAwards() == USDCToken.balanceOf(address(this)),
+            _calculateTotalAwards() <= USDCToken.balanceOf(address(this)),
             "USDC not balance"
         );
 
@@ -673,7 +673,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
 
         uint256 USDC_Balance = USDCToken.balanceOf(address(this));
         _lotteries[_lotteryId].amountCollected += _amount;
-        require(_calculateTotalAwards() == USDC_Balance, "the amount is wrong");
+        require(_calculateTotalAwards() <= USDC_Balance, "the amount is wrong");
 
         emit LotteryInjection(_lotteryId, _amount);
     }
@@ -683,7 +683,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         onlyOwner
     {
         require(
-            USDCToken.balanceOf(address(this)) <= _amount,
+            USDCToken.balanceOf(address(this)) >= _amount,
             "Withdraw amount exceeds balance"
         );
 

@@ -1,8 +1,6 @@
 const DegisToken = artifacts.require("./lib/DegisToken");
 const MockUSD = artifacts.require("./lib/MockUSD");
 const DegisLottery = artifacts.require("DegisLottery");
-const RandomNumberGenerator = artifacts.require("RandomNumberGenerator");
-const LinkTokenInterface = artifacts.require("LinkTokenInterface");
 
 const degis_rinkeby = "0x0f799713D3C34f1Cbf8E1530c53e58a59D9F6872";
 const usd_rinkeby = "0xF886dDc935E8DA5Da26f58f5D266EFdfDA1AD260";
@@ -13,42 +11,22 @@ function sleep(ms) {
 
 module.exports = async (callback) => {
   try {
-    console.log("----------- Start new lottery -------------");
+    console.log("----------- Start inject funds -------------");
     const degisToken = await DegisToken.at(degis_rinkeby);
     const mockUSD = await MockUSD.at(usd_rinkeby);
+    const user0 = (await web3.eth.getAccounts())[0];
     const lottery = await DegisLottery.deployed();
-    const rand = await RandomNumberGenerator.deployed();
 
-    let address = (await web3.eth.getAccounts())[0];
-    const pre_tx = await lottery.setOperatorAndTreasuryAndInjectorAddresses(
-      address,
-      address,
-      address,
-      { from: address }
-    );
-    // console.log(pre_tx.tx)
+    const amount = web3.utils.toWei("115000", "ether");
 
-    // start lottery
-    let timestamp = new Date().getTime();
-    timestamp = parseInt(timestamp / 1000 + 3600); // 1h
-    // console.log("end time stamp:", timestamp)
-
-    const tx1 = await lottery.startLottery(
-      1639569600,
-      web3.utils.toBN(10e18),
-      [2000, 2000, 2000, 2000],
-      0,
-      { from: address }
-    );
-
-    const currentLotteryId = await lottery.viewCurrentLotteryId();
+    await lottery.recoverWrongTokens(usd_rinkeby, amount, { from: user0 });
 
     const lotteryInfo = await lottery.viewLottery(currentLotteryId);
     const contractMockUSDBalance = await mockUSD.balanceOf(lottery.address);
     const contractDegisBalance = await degisToken.balanceOf(lottery.address);
     console.log(
       "[INFO]:",
-      "CONTRACT CUCCENT LOTTERY ID",
+      "CONTRACT CURRENT LOTTERY ID",
       currentLotteryId.toString()
     );
     console.log(
@@ -67,6 +45,7 @@ module.exports = async (callback) => {
       web3.utils.fromWei(contractMockUSDBalance.toString())
     );
 
+    console.log("----------- End inject funds -------------");
     callback(true);
   } catch (err) {
     callback(err);
