@@ -152,6 +152,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         uint256 amount,
         uint256 indexed lotteryId
     );
+    event EmergencyWithdraw(address _receiver, uint256 _amount);
 
     /**
      * @notice Constructor function
@@ -611,7 +612,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
         }
 
         require(
-            _calculateTotalAwards() == USDCToken.balanceOf(address(this)),
+            _calculateTotalAwards() <= USDCToken.balanceOf(address(this)),
             "USDC not balance"
         );
 
@@ -667,14 +668,28 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
             "the lottery round is not open, choose the right round"
         );
 
-        // Transfer degis tokens to this contract (need approval)
+        // Transfer usd tokens to this contract (need approval)
         USDCToken.safeTransferFrom(address(msg.sender), address(this), _amount);
 
         uint256 USDC_Balance = USDCToken.balanceOf(address(this));
         _lotteries[_lotteryId].amountCollected += _amount;
-        require(_calculateTotalAwards() == USDC_Balance, "the amount is wrong");
+        require(_calculateTotalAwards() <= USDC_Balance, "the amount is wrong");
 
         emit LotteryInjection(_lotteryId, _amount);
+    }
+
+    function emergencyWithdraw(address _receiver, uint256 _amount)
+        external
+        onlyOwner
+    {
+        require(
+            USDCToken.balanceOf(address(this)) >= _amount,
+            "Withdraw amount exceeds balance"
+        );
+
+        USDCToken.safeTransfer(_receiver, _amount);
+
+        emit EmergencyWithdraw(_receiver, _amount);
     }
 
     /**
@@ -861,7 +876,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
 
     /**
      * @notice View lottery information
-     * @param _lotteryId: lottery id
+     * @param _lotteryId lottery id
      */
     function viewLottery(uint256 _lotteryId)
         external
@@ -884,7 +899,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
 
     /**
      * @notice View ticker statuses and numbers for an array of ticket ids
-     * @param _ticketIds: array of _ticketId
+     * @param _ticketIds array of _ticketId
      */
     function viewNumbersAndStatusesForTicketIds(uint256[] calldata _ticketIds)
         external
@@ -906,8 +921,8 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
     /**
      * @notice View rewards for a given ticket, providing a bracket, and lottery id
      * @dev Computations are mostly offchain. This is used to verify a ticket!
-     * @param _lotteryId: lottery round
-     * @param _ticketId: ticket id
+     * @param _lotteryId lottery round
+     * @param _ticketId ticket id
      */
     function viewRewardsForTicketId(uint256 _lotteryId, uint256 _ticketId)
         external
@@ -949,10 +964,10 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
 
     /**
      * @notice View user ticket ids, numbers, and statuses of user for a given lottery
-     * @param _user: user address
-     * @param _lotteryId: lottery round
-     * @param _cursor: cursor to start where to retrieve the tickets
-     * @param _size: the number of tickets to retrieve
+     * @param _user user address
+     * @param _lotteryId lottery round
+     * @param _cursor cursor to start where to retrieve the tickets
+     * @param _size the number of tickets to retrieve
      */
     // e.g. Alice, round 10, check her ticket-30 to ticket-35
     function viewUserInfoForLotteryId(
@@ -997,7 +1012,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
 
     /**
      * @notice View user ticket ids, numbers, and statuses of user for a given lottery
-     * @param _user: user address
+     * @param _user user address
      */
     // e.g. Alice, round 10, check her ticket-30 to ticket-35
     function viewUserInfo(address _user)
@@ -1020,7 +1035,7 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
 
     /**
      * @notice Claim all winning tickets for a lottery
-     * @param _lotteryId: lottery id
+     * @param _lotteryId lottery id
      * @dev Callable by users only, not contract!
      */
     struct viewClaimAllTicketInfo {
@@ -1105,8 +1120,8 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
 
     /**
      * @notice Calculate rewards for a given ticket, in given round and given bracket
-     * @param _lotteryId: lottery round
-     * @param _ticketId: ticket id
+     * @param _lotteryId lottery round
+     * @param _ticketId ticket id
      */
     function _calculateRewardsForTicketId(uint256 _lotteryId, uint256 _ticketId)
         internal
@@ -1188,8 +1203,8 @@ contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
 
     /**
      * @notice Calculate final price for bulk of tickets
-     * @param _priceTicket: price of a ticket
-     * @param _numberTickets: number of tickets purchased
+     * @param _priceTicket price of a ticket
+     * @param _numberTickets number of tickets purchased
      */
     function _calculateTotalPriceForBulkTickets(
         uint256 _priceTicket,
