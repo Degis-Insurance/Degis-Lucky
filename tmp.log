@@ -1,0 +1,70 @@
+{
+  mnemonic: 'food game bunker busy leave split doll timber pretty quantum bless mother',
+  infuraKey: 'dbb3ec452ba34b618c5d754e657ce080'
+}
+Using network 'development'.
+
+1640338716882
+degis: 0x467ff187BB77c5aE902306EC3A1Fe2E8e6b50c08
+mockUSD 0xB88F60AE43332629e66A08A5f792b89180fde91a
+lottery 0x40B80dAc4e20f47d35c8E3f5ab1a4748214fB110
+
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+[INFO]: USER 1 0xd7B0498cB3D6924A51842D0D6748A085900bd45B
+BALANCE INFO
+[INFO]: USER DEGIS BALANCE 997800
+[INFO]: USER USD BALANCE 0
+TICKETS INFO:
+0,1111,2222,3333,4444,5555,6666,7777,8888,9999,1999
+20,20,20,20,20,20,20,20,20,20,20
+37142840,37142840,37142840,37142840,37142840,37142840,37142840,37142840,37142840,37142840,37142840
+REWARD INFO
+1,2
+0,1185.964919749670058325
+1,0
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+[INFO]: USER 2 0xdd0F243c2ccE23BB5D9210b910221FB19A3142a1
+BALANCE INFO
+[INFO]: USER DEGIS BALANCE 995600
+[INFO]: USER USD BALANCE 2000
+TICKETS INFO:
+0,1111,2222,3333,4444,5555,6666,7777,8888,9999,1999
+40,40,40,40,40,40,40,40,40,40,40
+75604360,75604360,75604360,75604360,75604360,75604360,75604360,75604360,75604360,75604360,75604360
+REWARD INFO
+1,2
+2000,2414.035080250329941674
+1,0
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+[INFO]: POOL 0x40B80dAc4e20f47d35c8E3f5ab1a4748214fB110
+BALANCE INFO
+[INFO]: POOL DEGIS BALANCE 6600
+[INFO]: POOL USD BALANCE 18000
+TICKETS INFO:
+0,1111,2222,3333,4444,5555,6666,7777,8888,9999,1999
+60,60,60,60,60,60,60,60,60,60,60
+112747200,112747200,112747200,112747200,112747200,112747200,112747200,112747200,112747200,112747200,112747200
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+1
+status 3
+finalNumber 5647
+injectedAwards 10000
+pendingAwards 0
+stageReward [ '2000', '0', '0', '0' ]
+stageAmount [ '20', '0', '0', '0' ]
+stageWeight [ '38461520', '0', '0', '0' ]
+2
+status 3
+finalNumber 6781
+injectedAwards 18000
+pendingAwards 3600
+stageReward [ '3600', '0', '0', '0' ]
+stageAmount [ '60', '0', '0', '0' ]
+stageWeight [ '112747200', '0', '0', '0' ]
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

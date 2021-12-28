@@ -21,14 +21,9 @@ module.exports = async callback => {
       const user1 = address[1]
       const user2 = address[2]
 
-      const currentLotteryId = await lottery.viewCurrentLotteryId()
-      // await lottery.receiveAward(currentLotteryId, {from:user1});
-
-      const user1Awadrs = await lottery.receiveAward(currentLotteryId, user1,{from:user1})
-      const user2Awadrs = await lottery.receiveAward(currentLotteryId, user2,{from:user2})
-
-      console.log('[INFO]:', 'USER1 AWADRS', web3.utils.fromWei(user1Awadrs.toString()))
-      console.log('[INFO]:', 'USER2 AWADRS', web3.utils.fromWei(user2Awadrs.toString()))
+      await lottery.claimAllTickets(2, {from:user1});
+      await lottery.claimAllTickets(1, {from:user2});
+      await lottery.claimAllTickets(2, {from:user2});
 
       user1USDTokenBalance = await mockUSD.balanceOf(user1)
       user2USDTokenBalance = await mockUSD.balanceOf(user2)
@@ -36,6 +31,12 @@ module.exports = async callback => {
       console.log('[INFO]:', 'USER2 USD BALANCE', web3.utils.fromWei(user2USDTokenBalance.toString()))
 
       console.log("----------- End claim -------------") 
+
+      const lotteryInfo = await lottery.viewAllLottery()
+      console.log("===============")
+      console.log(lotteryInfo)
+      console.log("===============")
+
       callback(true)
     }
     catch (err) {

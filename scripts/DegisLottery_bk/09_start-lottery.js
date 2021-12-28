@@ -10,7 +10,7 @@ function sleep(ms) {
 
 module.exports = async callback => {
   	try {
-		console.log("----------- Start new lottery -------------") 
+			console.log("----------- Start new lottery -------------") 
   		const degisToken = await DegisToken.deployed()
     	const mockUSD = await MockUSD.deployed()
     	const lottery = await DegisLottery.deployed()
@@ -27,20 +27,22 @@ module.exports = async callback => {
 
 			const tx1 = await lottery.startLottery(
 				timestamp,
+				web3.utils.toBN(10e18),
 				[2000, 2000, 2000, 2000],
+				0,
 				{ from: address }
 			  );
 
-			// const currentLotteryId = await lottery.viewCurrentLotteryId()
+			const currentLotteryId = await lottery.viewCurrentLotteryId()
 			
-			// const lotteryInfo = await lottery.lotteries(currentLotteryId)
-			// const contractMockUSDBalance = await mockUSD.balanceOf(lottery.address)
-			// const contractDegisBalance = await degisToken.balanceOf(lottery.address)
-			// console.log('[INFO]:', 'CONTRACT CUCCENT LOTTERY ID', currentLotteryId.toString())
-			// console.log('[INFO]:', 'CONTRACT CURRENT LOTTERY STATUS', lotteryInfo.status.toString())
-			// console.log('[INFO]:', 'CONTRACT DEGIS BALANCE', web3.utils.fromWei(contractDegisBalance.toString()))
-			// console.log('[INFO]:', 'CONTRACT USD BALANCE', web3.utils.fromWei(contractMockUSDBalance.toString()))
-			// console.log("----------- End new lottery -------------") 
+			const lotteryInfo = await lottery.viewLottery(currentLotteryId)
+			const contractMockUSDBalance = await mockUSD.balanceOf(lottery.address)
+			const contractDegisBalance = await degisToken.balanceOf(lottery.address)
+			console.log('[INFO]:', 'CONTRACT CUCCENT LOTTERY ID', currentLotteryId.toString())
+			console.log('[INFO]:', 'CONTRACT CURRENT LOTTERY STATUS', lotteryInfo.status)
+			console.log('[INFO]:', 'CONTRACT DEGIS BALANCE', web3.utils.fromWei(contractDegisBalance.toString()))
+			console.log('[INFO]:', 'CONTRACT USD BALANCE', web3.utils.fromWei(contractMockUSDBalance.toString()))
+			console.log("----------- End new lottery -------------") 
 			callback(true)
   	}
   	catch (err) {

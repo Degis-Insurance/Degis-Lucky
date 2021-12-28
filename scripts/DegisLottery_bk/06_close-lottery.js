@@ -26,32 +26,32 @@ module.exports = async (callback) => {
     let address = (await web3.eth.getAccounts())[0];
     console.log("my account", address);
     const currentLotteryId = await lottery.viewCurrentLotteryId();
-    const tx1 = await lottery.closeLottery({ from: address });
+    const tx1 = await lottery.closeLottery(currentLotteryId, { from: address });
     console.log(tx1.tx);
 
-    // const lotteryInfo = await lottery.lotteries(currentLotteryId);
-    // const contractMockUSDBalance = await mockUSD.balanceOf(lottery.address);
-    // const contractDegisBalance = await degisToken.balanceOf(lottery.address);
-    // console.log(
-    //   "[INFO]:",
-    //   "CONTRACT CURRENT LOTTERY ID",
-    //   currentLotteryId.toString()
-    // );
-    // console.log(
-    //   "[INFO]:",
-    //   "CONTRACT CURRENT LOTTERY STATUS",
-    //   lotteryInfo.status.toString()
-    // );
-    // console.log(
-    //   "[INFO]:",
-    //   "CONTRACT DEGIS BALANCE",
-    //   web3.utils.fromWei(contractDegisBalance.toString())
-    // );
-    // console.log(
-    //   "[INFO]:",
-    //   "CONTRACT USD BALANCE",
-    //   web3.utils.fromWei(contractMockUSDBalance.toString())
-    // );
+    const lotteryInfo = await lottery.viewLottery(currentLotteryId);
+    const contractMockUSDBalance = await mockUSD.balanceOf(lottery.address);
+    const contractDegisBalance = await degisToken.balanceOf(lottery.address);
+    console.log(
+      "[INFO]:",
+      "CONTRACT CURRENT LOTTERY ID",
+      currentLotteryId.toString()
+    );
+    console.log(
+      "[INFO]:",
+      "CONTRACT CURRENT LOTTERY STATUS",
+      lotteryInfo.status
+    );
+    console.log(
+      "[INFO]:",
+      "CONTRACT DEGIS BALANCE",
+      web3.utils.fromWei(contractDegisBalance.toString())
+    );
+    console.log(
+      "[INFO]:",
+      "CONTRACT USD BALANCE",
+      web3.utils.fromWei(contractMockUSDBalance.toString())
+    );
 
     console.log("----------- End close lottery -------------");
 
