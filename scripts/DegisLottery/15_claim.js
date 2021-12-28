@@ -21,23 +21,37 @@ module.exports = async callback => {
       const user1 = address[1]
       const user2 = address[2]
 
-      await lottery.claimAllTickets(2, {from:user1});
-      await lottery.claimAllTickets(1, {from:user2});
-      await lottery.claimAllTickets(2, {from:user2});
 
-      user1USDTokenBalance = await mockUSD.balanceOf(user1)
-      user2USDTokenBalance = await mockUSD.balanceOf(user2)
-      console.log('[INFO]:', 'USER1 USD BALANCE', web3.utils.fromWei(user1USDTokenBalance.toString()))
-      console.log('[INFO]:', 'USER2 USD BALANCE', web3.utils.fromWei(user2USDTokenBalance.toString()))
+      let user1Awadrs = await lottery.receiveAward(1, user1,{from:user1})
+      let user2Awadrs = await lottery.receiveAward(1, user2,{from:user2})
+      console.log('[INFO]:', 'USER1 AWADRS', web3.utils.fromWei(user1Awadrs.toString()))
+      console.log('[INFO]:', 'USER2 AWADRS', web3.utils.fromWei(user2Awadrs.toString()))
 
-      console.log("----------- End claim -------------") 
+      user1Awadrs = await lottery.receiveAward(2, user1,{from:user1})
+      user2Awadrs = await lottery.receiveAward(2, user2,{from:user2})
+      console.log('[INFO]:', 'USER1 AWADRS', web3.utils.fromWei(user1Awadrs.toString()))
+      console.log('[INFO]:', 'USER2 AWADRS', web3.utils.fromWei(user2Awadrs.toString()))
 
-      const lotteryInfo = await lottery.viewAllLottery()
-      console.log("===============")
-      console.log(lotteryInfo)
-      console.log("===============")
+      // await lottery.claimAllTickets(2, {from:user1});
+      // await lottery.claimAllTickets(1, {from:user2});
+      // await lottery.claimAllTickets(2, {from:user2});
 
-      callback(true)
+      // await lottery.receiveAwards(2 ,{from:user1})
+      // await lottery.receiveAwards(2 ,{from:user2})
+
+      // user1USDTokenBalance = await mockUSD.balanceOf(user1)
+      // user2USDTokenBalance = await mockUSD.balanceOf(user2)
+      // console.log('[INFO]:', 'USER1 USD BALANCE', web3.utils.fromWei(user1USDTokenBalance.toString()))
+      // console.log('[INFO]:', 'USER2 USD BALANCE', web3.utils.fromWei(user2USDTokenBalance.toString()))
+
+      // console.log("----------- End claim -------------") 
+
+      // const lotteryInfo = await lottery.lotteries.call(2)
+      // console.log("===============")
+      // console.log(lotteryInfo)
+      // console.log("===============")
+
+      // callback(true)
     }
     catch (err) {
       callback(err)

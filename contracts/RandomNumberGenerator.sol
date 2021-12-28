@@ -54,7 +54,7 @@ contract RandomNumberGenerator is
         string memory randInput = string(
             abi.encodePacked((block.timestamp).toString(), address(this))
         );
-        randomResult = uint32(10000 + (_rand(randInput) % 10000));
+        randomResult = uint32(_rand(randInput) % 10000);
         //*********************************//
 
         // latestRequestId = requestRandomness(keyHash, fee);

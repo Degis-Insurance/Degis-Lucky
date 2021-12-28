@@ -3,74 +3,60 @@ pragma solidity 0.8.9;
 
 interface IDegisLottery {
     /**
-     * @notice Buy tickets for the current lottery
-     * @param _ticketNumbers: array of ticket numbers between 10,000 and 19,999
-     * @dev Callable by users
+     * @notice Buy tickets for the current lottery round
+     * @dev Can not be called by a smart contract
+     * @param _ticketNumbers array of ticket numbers between 0 and 9999
+     * @param _ticketAmounts array of ticket amount
      */
-    function buyTickets(uint32[] calldata _ticketNumbers) external;
-
-    /**
-     * @notice Redeem tickets for all lottery
-     * @param _ticketIds: array of ticket ids
-     * @dev Callable by users
-     */
-    function redeemTickets(uint256[] calldata _ticketIds) external;
-
-    /**
-     * @notice Claim a set of winning tickets for a lottery
-     * @param _lotteryId: lottery id
-     * @param _ticketIds: array of ticket ids
-     * @dev Callable by users only, not contract!
-     */
-    function claimTickets(uint256 _lotteryId, uint256[] calldata _ticketIds)
-        external;
-
-    /**
-     * @notice Claim all winning tickets for a lottery
-     * @param _lotteryId: lottery id
-     * @dev Callable by users only, not contract!
-     */
-    function claimAllTickets(uint256 _lotteryId) external;
-
-    /**
-     * @notice Close lottery
-     * @param _lotteryId: lottery id
-     * @dev Callable by operator
-     */
-    function closeLottery(uint256 _lotteryId) external;
-
-    /**
-     * @notice Draw the final number, calculate reward in CAKE per group, and make lottery claimable
-     * @param _lotteryId: lottery id
-     * @param _autoInjection: reinjects funds into next lottery (vs. withdrawing all)
-     * @dev Callable by operator
-     */
-    function drawFinalNumberAndMakeLotteryClaimable(
-        uint256 _lotteryId,
-        bool _autoInjection
+    function buyTickets(
+        uint256[] calldata _ticketNumbers,
+        uint256[] calldata _ticketAmounts
     ) external;
 
     /**
-     * @notice Inject funds
-     * @param _lotteryId: lottery id
-     * @param _amount: amount to inject in CAKE token
-     * @dev Callable by operator
+     * @notice Redeem tickets for all lottery
+     * @param _ticketNumbers Array of ticket numbers
+     * @dev Callable by users
      */
-    function injectFunds(uint256 _lotteryId, uint256 _amount) external;
+    function redeemTickets(uint256[] calldata _ticketNumbers) external;
+
+    /**
+     * @notice Receive all awards from lottery before lottery id
+     * @param _lotteryId lottery id
+     * @dev Callable by users only, not contract!
+     */
+    function receiveAwards(uint256 _lotteryId) external;
+
+    /**
+     * @notice Close a lottery
+     * @dev Callable only by the operator
+     */
+    function closeLottery() external;
+
+    /**
+     * @notice Draw the final number, calculate reward in DEG for each group, 
+               and make this lottery claimable (need to wait for the random generator)
+     * @dev Callable only by the operator
+     */
+    function drawLottery() external;
+
+    /**
+     * @notice Inject funds
+     * @param _amount amount to inject 
+     * @dev Callable by owner(incentive) or injector address(insurancePool income)
+            First transfer USD and then call this function to record
+     */
+    function injectFunds(uint256 _amount) external;
 
     /**
      * @notice Start the lottery
-     * @dev Callable by operator
-     * @param _endTime: endTime of the lottery
-     * @param _priceTicketInCake: price of a ticket in CAKE
-     * @param _rewardsBreakdown: breakdown of rewards per bracket (must sum to 10,000)
-     * @param _treasuryFee: treasury fee (10,000 = 100%, 100 = 1%)
+     * @dev Callable only by operator
+     * @param _endTime endTime of the lottery (timestamp in s)
+     * @param _stageProportion breakdown of rewards per bracket (must sum to 10,000)(100 <=> 1)
      */
     function startLottery(
         uint256 _endTime,
-        uint256 _priceTicketInCake,
-        uint256[4] calldata _rewardsBreakdown,
-        uint256 _treasuryFee
+        uint256[4] calldata _stageProportion
     ) external;
 
     /**

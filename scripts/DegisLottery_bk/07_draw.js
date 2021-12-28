@@ -31,7 +31,10 @@ module.exports = async (callback) => {
     // const tx = await rand.getRandomNumber({ from: user0 });
     const result = await rand.randomResult.call();
     console.log("result:", parseInt(result));
-    const tx2 = await lottery.drawLottery(
+
+    const tx2 = await lottery.drawFinalNumberAndMakeLotteryClaimable(
+      currentLotteryId,
+      1,
       { from: user0 }
     );
     console.log(tx2.tx);
@@ -40,48 +43,48 @@ module.exports = async (callback) => {
     // await sleep(10000)
     // console.log("----------- end sleep -------------")
 
-    // const lotteryInfo = await lottery.lotteries(currentLotteryId);
-    // const contractMockUSDBalance = await mockUSD.balanceOf(lottery.address);
-    // const contractDegisBalance = await degisToken.balanceOf(lottery.address);
-    // console.log(
-    //   "[INFO]:",
-    //   "CONTRACT CURRENT LOTTERY ID",
-    //   currentLotteryId.toString()
-    // );
-    // console.log(
-    //   "[INFO]:",
-    //   "CONTRACT CURRENT LOTTERY STATUS",
-    //   lotteryInfo.status.toString()
-    // );
-    // console.log(
-    //   "[INFO]:",
-    //   "CONTRACT CURRENT LOTTERY FINAL NUMBER",
-    //   lotteryInfo.finalNumber.toString()
-    // );
-    // console.log(
-    //   "[INFO]:",
-    //   "CONTRACT DEGIS BALANCE",
-    //   web3.utils.fromWei(contractDegisBalance.toString())
-    // );
-    // console.log(
-    //   "[INFO]:",
-    //   "CONTRACT USD BALANCE",
-    //   web3.utils.fromWei(contractMockUSDBalance.toString())
-    // );
-    // console.log(
-    //   "[INFO]:",
-    //   "CONTRACT PENDING AWARDS",
-    //   currentLotteryId.toString(),
-    //   web3.utils.fromWei(lotteryInfo.pendingAwards.toString())
-    // );
+    const lotteryInfo = await lottery.viewLottery(currentLotteryId);
 
-    // const pendingInjectionNextLottery =
-    //   await lottery.pendingAwardsToNextLottery.call();
-    // console.log(
-    //   "[INFO]:",
-    //   "CONTRACT NEXT ROUND OF MONEY",
-    //   web3.utils.fromWei(pendingInjectionNextLottery.toString())
-    // );
+    const contractMockUSDBalance = await mockUSD.balanceOf(lottery.address);
+    const contractDegisBalance = await degisToken.balanceOf(lottery.address);
+    console.log(
+      "[INFO]:",
+      "CONTRACT CURRENT LOTTERY ID",
+      currentLotteryId.toString()
+    );
+    console.log(
+      "[INFO]:",
+      "CONTRACT CURRENT LOTTERY STATUS",
+      lotteryInfo.status
+    );
+    console.log(
+      "[INFO]:",
+      "CONTRACT CURRENT LOTTERY FINAL NUMBER",
+      lotteryInfo.finalNumber
+    );
+    console.log(
+      "[INFO]:",
+      "CONTRACT DEGIS BALANCE",
+      web3.utils.fromWei(contractDegisBalance.toString())
+    );
+    console.log(
+      "[INFO]:",
+      "CONTRACT USD BALANCE",
+      web3.utils.fromWei(contractMockUSDBalance.toString())
+    );
+    console.log(
+      "[INFO]:",
+      "CONTRACT PENDING AWARDS",
+      currentLotteryId.toString(),
+      web3.utils.fromWei(lotteryInfo.pendingAwards.toString())
+    );
+    const pendingInjectionNextLottery =
+      await lottery.pendingInjectionNextLottery.call();
+    console.log(
+      "[INFO]:",
+      "CONTRACT NEXT ROUND OF MONEY",
+      web3.utils.fromWei(pendingInjectionNextLottery.toString())
+    );
     // const user1Awadrs = await lottery.viewClaimAllTickets(currentLotteryId, {
     //   from: user1,
     // });

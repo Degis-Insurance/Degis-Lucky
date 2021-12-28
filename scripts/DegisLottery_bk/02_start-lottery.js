@@ -33,39 +33,41 @@ module.exports = async (callback) => {
     // start lottery
     let timestamp = new Date().getTime();
     timestamp = parseInt(timestamp / 1000 + 3600); // 1h
-    console.log("end time stamp:", timestamp)
+    // console.log("end time stamp:", timestamp)
 
     const tx1 = await lottery.startLottery(
-      timestamp,
+      1639569600,
+      web3.utils.toBN(10e18),
       [2000, 2000, 2000, 2000],
+      0,
       { from: address }
     );
 
-    // const currentLotteryId = await lottery.viewCurrentLotteryId();
+    const currentLotteryId = await lottery.viewCurrentLotteryId();
 
-    // const lotteryInfo = await lottery.lotteries(currentLotteryId);
-    // const contractMockUSDBalance = await mockUSD.balanceOf(lottery.address);
-    // const contractDegisBalance = await degisToken.balanceOf(lottery.address);
-    // console.log(
-    //   "[INFO]:",
-    //   "CONTRACT CUCCENT LOTTERY ID",
-    //   currentLotteryId.toString()
-    // );
-    // console.log(
-    //   "[INFO]:",
-    //   "CONTRACT CURRENT LOTTERY STATUS",
-    //   lotteryInfo.status.toString()
-    // );
-    // console.log(
-    //   "[INFO]:",
-    //   "CONTRACT DEGIS BALANCE",
-    //   web3.utils.fromWei(contractDegisBalance.toString())
-    // );
-    // console.log(
-    //   "[INFO]:",
-    //   "CONTRACT USD BALANCE",
-    //   web3.utils.fromWei(contractMockUSDBalance.toString())
-    // );
+    const lotteryInfo = await lottery.viewLottery(currentLotteryId);
+    const contractMockUSDBalance = await mockUSD.balanceOf(lottery.address);
+    const contractDegisBalance = await degisToken.balanceOf(lottery.address);
+    console.log(
+      "[INFO]:",
+      "CONTRACT CUCCENT LOTTERY ID",
+      currentLotteryId.toString()
+    );
+    console.log(
+      "[INFO]:",
+      "CONTRACT CURRENT LOTTERY STATUS",
+      lotteryInfo.status
+    );
+    console.log(
+      "[INFO]:",
+      "CONTRACT DEGIS BALANCE",
+      web3.utils.fromWei(contractDegisBalance.toString())
+    );
+    console.log(
+      "[INFO]:",
+      "CONTRACT USD BALANCE",
+      web3.utils.fromWei(contractMockUSDBalance.toString())
+    );
 
     callback(true);
   } catch (err) {
