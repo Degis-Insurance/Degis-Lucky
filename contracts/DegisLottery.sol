@@ -9,12 +9,9 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IDegisLottery.sol";
 import "./interfaces/IRandomNumberGenerator.sol";
-import "./lib/ABDKMath64x64.sol";
 
 contract DegisLottery is ReentrancyGuard, IDegisLottery, Ownable {
     using SafeERC20 for IERC20;
-    using ABDKMath64x64 for uint256;
-    using ABDKMath64x64 for int128;
 
     IERC20 public DEGToken;
     IERC20 public USDToken;
